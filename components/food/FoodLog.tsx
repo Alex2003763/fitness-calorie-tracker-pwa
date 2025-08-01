@@ -31,9 +31,15 @@ const FoodLog: React.FC<FoodLogProps> = ({ entries, onDelete }) => {
             <div className="flex-grow">
               <p className="font-bold text-white capitalize">{entry.name}</p>
               <p className="text-sm text-gray-400 capitalize">{t(`log.meal.${entry.meal}`)}</p>
+              <div className="text-xs text-gray-500 mt-1 flex space-x-2">
+                  <span>P: {entry.protein}g</span>
+                  <span>C: {entry.carbs}g</span>
+                  <span>F: {entry.fat}g</span>
+              </div>
             </div>
             <div className="text-right flex-shrink-0 pr-3">
               <p className="font-bold text-lg text-blue-400">{entry.calories.toLocaleString()}</p>
+              <p className="text-xs text-gray-400">{t('dashboard.kcal')}</p>
             </div>
             <button onClick={() => onDelete(entry.id)} className="text-gray-600 hover:text-red-500 transition-colors opacity-50 hover:opacity-100">
               <TrashIcon className="w-5 h-5" />

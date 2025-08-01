@@ -18,11 +18,15 @@
     "of": "/",
     "kcal": "kcal",
     "net_calories_7_days": "Net Calories (Last 7 Days)",
-    "net_calories": "Net Calories"
+    "net_calories": "Net Calories",
+    "macronutrients": "Macronutrients"
   },
   "log": {
     "food": "Food",
     "exercise": "Exercise",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
     "log_food": "Log Food",
     "title": "Daily Log",
     "summary": "Summary",
@@ -115,6 +119,13 @@
       "tdee_result_1": "Your estimated daily calorie need is",
       "tdee_result_2": "Your daily goal has been updated.",
       "daily_goal": "Daily Calorie Goal"
+    },
+    "macronutrient_goals": {
+      "title": "Macronutrient Goals",
+      "desc": "Set your daily goals for protein, carbs, and fat in grams.",
+      "protein": "Protein (g)",
+      "carbs": "Carbs (g)",
+      "fat": "Fat (g)"
     },
     "data_management": {
       "title": "Data Management",

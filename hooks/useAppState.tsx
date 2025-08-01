@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { AppState, DailyLog, FoodEntry, ExerciseEntry, UserProfile, ChatMessage } from '../types';
+import { AppState, DailyLog, FoodEntry, ExerciseEntry, UserProfile, ChatMessage, MacronutrientGoals } from '../types';
 
 const getInitialLanguage = (): 'en' | 'zh-TW' => {
   const browserLang = navigator.language.toLowerCase();
@@ -15,6 +15,11 @@ const getDateString = (date: Date): string => {
 
 const initialAppState: AppState = {
   dailyGoal: 2000,
+  macronutrientGoals: {
+    protein: 150,
+    carbs: 250,
+    fat: 60
+  },
   logs: {},
   customFoods: [],
   apiKey: null,
@@ -49,7 +54,8 @@ export const AppStateProvider = ({ children }: { children: React.ReactNode }) =>
         const language = parsedState.language || getInitialLanguage();
         const userProfile = parsedState.userProfile || initialAppState.userProfile;
         const chatHistory = parsedState.chatHistory || [];
-        setAppState({ ...initialAppState, ...parsedState, language, userProfile, chatHistory });
+        const macronutrientGoals = parsedState.macronutrientGoals || initialAppState.macronutrientGoals;
+        setAppState({ ...initialAppState, ...parsedState, language, userProfile, chatHistory, macronutrientGoals });
       } else {
         setAppState(initialAppState);
       }
@@ -124,6 +130,10 @@ export const AppStateProvider = ({ children }: { children: React.ReactNode }) =>
     updateState(prev => ({ ...prev, apiKey }));
   }, [updateState]);
 
+  const setMacronutrientGoals = useCallback((goals: MacronutrientGoals) => {
+    updateState(prev => ({ ...prev, macronutrientGoals: goals }));
+  }, [updateState]);
+
   const setAiModel = useCallback((aiModel: string) => {
     updateState(prev => ({ ...prev, aiModel }));
   }, [updateState]);
@@ -187,6 +197,7 @@ export const AppStateProvider = ({ children }: { children: React.ReactNode }) =>
     setDailyGoal,
     setApiKey,
     setAiModel,
+    setMacronutrientGoals,
     isInitialized,
     selectedDate,
     setSelectedDate,

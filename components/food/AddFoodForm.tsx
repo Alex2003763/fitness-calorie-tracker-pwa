@@ -11,11 +11,14 @@ interface AddFoodFormProps {
   onAddFood: (food: Omit<FoodEntry, 'id'>) => void;
   onScan: () => void;
   onUpload: () => void;
-  scannedFood: { name: string; calories: string };
+  scannedFood: { name?: string; calories?: string; protein?: string; carbs?: string; fat?: string; };
 }
 const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, scannedFood }) => {
   const [name, setName] = useState('');
   const [calories, setCalories] = useState('');
+  const [protein, setProtein] = useState('');
+  const [carbs, setCarbs] = useState('');
+  const [fat, setFat] = useState('');
   const [meal, setMeal] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,8 +27,11 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, 
 
   useEffect(() => {
     if (scannedFood) {
-      setName(scannedFood.name);
-      setCalories(scannedFood.calories);
+      setName(scannedFood.name || '');
+      setCalories(scannedFood.calories || '');
+      setProtein(scannedFood.protein || '');
+      setCarbs(scannedFood.carbs || '');
+      setFat(scannedFood.fat || '');
     }
   }, [scannedFood]);
 
@@ -47,10 +53,16 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, 
       onAddFood({
         name,
         calories: finalCalories,
+        protein: parseInt(protein, 10) || 0,
+        carbs: parseInt(carbs, 10) || 0,
+        fat: parseInt(fat, 10) || 0,
         meal,
       });
       setName('');
       setCalories('');
+      setProtein('');
+      setCarbs('');
+      setFat('');
     } catch (err) {
       setError(t('camera.scan_error')); // Using a generic error message
       console.error(err);
@@ -67,11 +79,37 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, 
           type="text"
           placeholder={t('log.food_name')}
           value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            setCalories(''); // Clear calories if user types a new name
-          }}
+          onChange={(e) => setName(e.target.value)}
           required
+          className="col-span-2"
+        />
+        <Input
+          type="number"
+          placeholder={t('log.calories')}
+          value={calories}
+          onChange={(e) => setCalories(e.target.value)}
+          required
+          className="col-span-2"
+        />
+        <Input
+          type="number"
+          placeholder={t('log.protein')}
+          value={protein}
+          onChange={(e) => setProtein(e.target.value)}
+          className="col-span-2"
+        />
+        <Input
+          type="number"
+          placeholder={t('log.carbs')}
+          value={carbs}
+          onChange={(e) => setCarbs(e.target.value)}
+          className="col-span-2"
+        />
+        <Input
+          type="number"
+          placeholder={t('log.fat')}
+          value={fat}
+          onChange={(e) => setFat(e.target.value)}
           className="col-span-2"
         />
           <Select

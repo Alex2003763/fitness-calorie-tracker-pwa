@@ -164,9 +164,9 @@ export const getAiFoodAnalysis = async (
     };
 
     const textPart: Part = {
-        text: language === 'zh-TW' 
-            ? "分析這張圖片裡的食物。辨識主要的食物品項，並估算其卡路里。如果有多種食物，專注於最主要的一項。如果無法辨識食物，請將 foodName 設為 'UNIDENTIFIED' 且卡路里設為 0。"
-            : "Analyze the food in this image. Identify the main food item and estimate its calories. If there are multiple items, focus on the most prominent one. If you cannot identify a food, set foodName to 'UNIDENTIFIED' and calories to 0."
+        text: language === 'zh-TW'
+            ? "分析這張圖片裡的食物。辨識主要的食物品項，並估算其卡路里、蛋白質、碳水化合物和脂肪（以克為單位）。如果有多種食物，專注於最主要的一項。如果無法辨識食物，請將 foodName 設為 'UNIDENTIFIED' 且所有數值設為 0。"
+            : "Analyze the food in this image. Identify the main food item and estimate its calories, protein, carbs, and fat in grams. If there are multiple items, focus on the most prominent one. If you cannot identify a food, set foodName to 'UNIDENTIFIED' and all numeric values to 0."
     };
 
     const responseSchema = {
@@ -180,8 +180,20 @@ export const getAiFoodAnalysis = async (
                 type: Type.NUMBER,
                 description: language === 'zh-TW' ? '估算的卡路里' : 'The estimated calories',
             },
+            protein: {
+                type: Type.NUMBER,
+                description: language === 'zh-TW' ? '估算的蛋白質（克）' : 'The estimated protein in grams',
+            },
+            carbs: {
+                type: Type.NUMBER,
+                description: language === 'zh-TW' ? '估算的碳水化合物（克）' : 'The estimated carbohydrates in grams',
+            },
+            fat: {
+                type: Type.NUMBER,
+                description: language === 'zh-TW' ? '估算的脂肪（克）' : 'The estimated fat in grams',
+            },
         },
-        required: ['foodName', 'calories'],
+        required: ['foodName', 'calories', 'protein', 'carbs', 'fat'],
     };
 
         const response: GenerateContentResponse = await ai.models.generateContent({
@@ -199,7 +211,8 @@ export const getAiFoodAnalysis = async (
 
     } catch(error) {
         console.error("Error analyzing food image:", error);
-        throw new Error(language === 'zh-TW' ? "無法分析食物圖片。" : "Failed to analyze food image.");
+        // Return a default error object that matches the FoodAnalysis structure
+        return { foodName: "UNIDENTIFIED", calories: 0, protein: 0, carbs: 0, fat: 0 };
     } finally {
         // Always restore original fetch
         globalThis.fetch = originalFetch;

@@ -145,6 +145,9 @@ export interface FoodEntry {
   id: string;
   name: string;
   calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
   meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
 }
 
@@ -163,6 +166,15 @@ export interface DailyLog {
 export interface FoodAnalysis {
     foodName: string;
     calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+}
+
+export interface MacronutrientGoals {
+  protein: number;
+  carbs: number;
+  fat: number;
 }
 
 export interface UserProfile {
@@ -175,6 +187,7 @@ export interface UserProfile {
 
 export interface AppState {
   dailyGoal: number;
+  macronutrientGoals: MacronutrientGoals;
   logs: Record<string, DailyLog>;
   customFoods: Omit<FoodEntry, 'id' | 'meal'>[];
   apiKey: string | null;

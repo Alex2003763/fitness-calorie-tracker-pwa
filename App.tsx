@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useAppState } from './hooks/useAppState.tsx';
-import type { ActiveView, FoodEntry, ExerciseEntry, DailyLog, ChatMessage, AppState, FoodAnalysis, UserProfile } from './types';
+import type { ActiveView, FoodEntry, ExerciseEntry, DailyLog, ChatMessage, AppState, FoodAnalysis, UserProfile, MacronutrientGoals } from './types';
 import { getAiAdvice, getAiFoodAnalysis } from './services/geminiService';
 import { HomeIcon, ClipboardIcon, SparklesIcon, TrashIcon, SendIcon, SettingsIcon, CameraIcon, ChevronLeftIcon, ChevronRightIcon, UserCircleIcon, DownloadIcon, UploadIcon, RefreshIcon } from './components/Icons';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from './components/ui';
@@ -128,9 +128,12 @@ const DateNavigator = ({ selectedDate, changeDate, t, locale }: { selectedDate: 
 
 // --- View Components ---
 
-const DashboardView = ({ dailyGoal, logs, selectedDate, setSelectedDate, t, locale }: { dailyGoal: number; logs: Record<string, DailyLog>; selectedDate: Date, setSelectedDate: (d: Date) => void, t: (key: string) => string, locale: string }) => {
+const DashboardView = ({ dailyGoal, logs, selectedDate, setSelectedDate, t, locale, macronutrientGoals }: { dailyGoal: number; logs: Record<string, DailyLog>; selectedDate: Date, setSelectedDate: (d: Date) => void, t: (key: string) => string, locale: string, macronutrientGoals: MacronutrientGoals }) => {
     const currentLog = logs[getDateString(selectedDate)] || { food: [], exercise: [] };
     const intake = currentLog.food.reduce((sum, item) => sum + item.calories, 0);
+    const protein = currentLog.food.reduce((sum, item) => sum + item.protein, 0);
+    const carbs = currentLog.food.reduce((sum, item) => sum + item.carbs, 0);
+    const fat = currentLog.food.reduce((sum, item) => sum + item.fat, 0);
     const burned = currentLog.exercise.reduce((sum, item) => sum + item.calories, 0);
     const net = intake - burned;
 
@@ -231,6 +234,40 @@ const DashboardView = ({ dailyGoal, logs, selectedDate, setSelectedDate, t, loca
                     </CardContent>
                 </Card>
             </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('dashboard.macronutrients')}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div>
+                        <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-300">{t('log.protein')}</span>
+                            <span className="text-sm font-medium text-gray-400">{protein.toFixed(0)}g / {macronutrientGoals.protein}g</span>
+                        </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2.5">
+                            <div className="bg-red-500 h-2.5 rounded-full" style={{ width: `${Math.min(100, (protein / macronutrientGoals.protein) * 100)}%` }}></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-300">{t('log.carbs')}</span>
+                            <span className="text-sm font-medium text-gray-400">{carbs.toFixed(0)}g / {macronutrientGoals.carbs}g</span>
+                        </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2.5">
+                            <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${Math.min(100, (carbs / macronutrientGoals.carbs) * 100)}%` }}></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-300">{t('log.fat')}</span>
+                            <span className="text-sm font-medium text-gray-400">{fat.toFixed(0)}g / {macronutrientGoals.fat}g</span>
+                        </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2.5">
+                            <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${Math.min(100, (fat / macronutrientGoals.fat) * 100)}%` }}></div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 };
@@ -254,7 +291,7 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [scanError, setScanError] = useState('');
-    const [scannedFood, setScannedFood] = useState<{name: string, calories: string}>({name: '', calories: ''});
+    const [scannedFood, setScannedFood] = useState<{name?: string, calories?: string, protein?: string, carbs?: string, fat?: string}>({});
     const fileUploadRef = useRef<HTMLInputElement>(null);
 
     const changeDate = (days: number) => {
@@ -275,12 +312,15 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
             const analysis: FoodAnalysis = await getAiFoodAnalysis(base64Image, appState.apiKey, appState.aiModel, appState.language);
             
             if (analysis.foodName === 'UNIDENTIFIED') {
-                setScannedFood({name: '', calories: ''});
+                setScannedFood({});
                 setScanError(t('camera.unidentified'));
             } else {
                 setScannedFood({
                     name: analysis.foodName,
-                    calories: analysis.calories > 0 ? String(analysis.calories) : ''
+                    calories: analysis.calories > 0 ? String(analysis.calories) : '',
+                    protein: analysis.protein > 0 ? String(analysis.protein) : '',
+                    carbs: analysis.carbs > 0 ? String(analysis.carbs) : '',
+                    fat: analysis.fat > 0 ? String(analysis.fat) : '',
                 });
                 setIsCameraOpen(false);
             }
@@ -482,13 +522,14 @@ const AiAssistantView = ({ appState, setChatHistory, clearChatHistory, currentLo
     );
 };
 
-const SettingsView = ({ appState, setApiKey, setAiModel, setLanguage, updateUserProfile, setDailyGoal, importData, checkForUpdates, t }: { appState: AppState; setApiKey: (key: string) => void; setAiModel: (model: string) => void; setLanguage: (lang: 'en' | 'zh-TW') => void; updateUserProfile: (profile: Partial<UserProfile>) => void; setDailyGoal: (goal: number) => void; importData: (state: AppState) => boolean; checkForUpdates: () => void; t: (key: string) => string; }) => {
+const SettingsView = ({ appState, setApiKey, setAiModel, setLanguage, updateUserProfile, setDailyGoal, importData, checkForUpdates, t, setMacronutrientGoals }: { appState: AppState; setApiKey: (key: string) => void; setAiModel: (model: string) => void; setLanguage: (lang: 'en' | 'zh-TW') => void; updateUserProfile: (profile: Partial<UserProfile>) => void; setDailyGoal: (goal: number) => void; importData: (state: AppState) => boolean; checkForUpdates: () => void; t: (key: string) => string; setMacronutrientGoals: (goals: MacronutrientGoals) => void; }) => {
     const [localState, setLocalState] = useState({
         apiKey: appState.apiKey || '',
         aiModel: appState.aiModel,
         language: appState.language,
         userProfile: appState.userProfile,
-        dailyGoal: appState.dailyGoal
+        dailyGoal: appState.dailyGoal,
+        macronutrientGoals: appState.macronutrientGoals
     });
     const [saveMessage, setSaveMessage] = useState('');
     const importFileRef = useRef<HTMLInputElement>(null);
@@ -507,6 +548,7 @@ const SettingsView = ({ appState, setApiKey, setAiModel, setLanguage, updateUser
         setLanguage(localState.language);
         updateUserProfile(localState.userProfile);
         setDailyGoal(localState.dailyGoal);
+        setMacronutrientGoals(localState.macronutrientGoals);
         setSaveMessage(t('settings.saved'));
         setTimeout(() => setSaveMessage(''), 3000);
     };
@@ -618,6 +660,29 @@ const SettingsView = ({ appState, setApiKey, setAiModel, setLanguage, updateUser
 
             <Card>
                 <CardHeader>
+                    <CardTitle>{t('settings.macronutrient_goals.title')}</CardTitle>
+                    <CardDescription>{t('settings.macronutrient_goals.desc')}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <Label htmlFor="proteinGoal">{t('settings.macronutrient_goals.protein')}</Label>
+                            <Input id="proteinGoal" name="protein" type="number" value={localState.macronutrientGoals.protein} onChange={(e) => setLocalState(prev => ({...prev, macronutrientGoals: {...prev.macronutrientGoals, protein: Number(e.target.value)}}))} />
+                        </div>
+                        <div>
+                            <Label htmlFor="carbsGoal">{t('settings.macronutrient_goals.carbs')}</Label>
+                            <Input id="carbsGoal" name="carbs" type="number" value={localState.macronutrientGoals.carbs} onChange={(e) => setLocalState(prev => ({...prev, macronutrientGoals: {...prev.macronutrientGoals, carbs: Number(e.target.value)}}))} />
+                        </div>
+                        <div>
+                            <Label htmlFor="fatGoal">{t('settings.macronutrient_goals.fat')}</Label>
+                            <Input id="fatGoal" name="fat" type="number" value={localState.macronutrientGoals.fat} onChange={(e) => setLocalState(prev => ({...prev, macronutrientGoals: {...prev.macronutrientGoals, fat: Number(e.target.value)}}))} />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
                     <CardTitle>{t('settings.ai_settings')}</CardTitle>
                     <CardDescription>{t('settings.ai_settings_desc')}</CardDescription>
                 </CardHeader>
@@ -675,7 +740,7 @@ const NavButton = ({ Icon, label, isActive, onClick }: { Icon: React.ElementType
 
 
 export default function App() {
-  const { appState, getLogForDate, addFood, addExercise, removeFood, removeExercise, setDailyGoal, setApiKey, setAiModel, isInitialized, selectedDate, setSelectedDate, setLanguage, updateUserProfile, setChatHistory, clearChatHistory, importData, checkForUpdates: checkSwUpdate } = useAppState();
+  const { appState, getLogForDate, addFood, addExercise, removeFood, removeExercise, setDailyGoal, setApiKey, setAiModel, isInitialized, selectedDate, setSelectedDate, setLanguage, updateUserProfile, setChatHistory, clearChatHistory, importData, checkForUpdates: checkSwUpdate, setMacronutrientGoals } = useAppState();
   const [activeView, setActiveView] = useState<ActiveView>('dashboard');
   const { t, isLoaded, currentLanguage, locale } = useTranslation(appState.language);
   const currentLog = useMemo(() => getLogForDate(getDateString(selectedDate)), [getLogForDate, selectedDate]);
@@ -748,15 +813,15 @@ export default function App() {
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
-        return <DashboardView dailyGoal={appState.dailyGoal} logs={appState.logs} selectedDate={selectedDate} setSelectedDate={setSelectedDate} t={t} locale={locale}/>;
+        return <DashboardView dailyGoal={appState.dailyGoal} logs={appState.logs} selectedDate={selectedDate} setSelectedDate={setSelectedDate} t={t} locale={locale} macronutrientGoals={appState.macronutrientGoals} />;
       case 'log':
         return <LogView currentLog={currentLog} addFood={addFood} addExercise={addExercise} removeFood={removeFood} removeExercise={removeExercise} appState={appState} t={t} selectedDate={selectedDate} setSelectedDate={setSelectedDate} locale={locale} />;
       case 'ai':
         return <AiAssistantView appState={appState} setChatHistory={setChatHistory} clearChatHistory={clearChatHistory} currentLog={currentLog} onNav={setActiveView} t={t} />;
       case 'settings':
-        return <SettingsView appState={appState} setApiKey={setApiKey} setAiModel={setAiModel} setLanguage={setLanguage} updateUserProfile={updateUserProfile} setDailyGoal={setDailyGoal} importData={importData} checkForUpdates={checkForUpdates} t={t} />;
+        return <SettingsView appState={appState} setApiKey={setApiKey} setAiModel={setAiModel} setLanguage={setLanguage} updateUserProfile={updateUserProfile} setDailyGoal={setDailyGoal} importData={importData} checkForUpdates={checkForUpdates} t={t} setMacronutrientGoals={setMacronutrientGoals} />;
       default:
-        return <DashboardView dailyGoal={appState.dailyGoal} logs={appState.logs} selectedDate={selectedDate} setSelectedDate={setSelectedDate} t={t} locale={locale}/>;
+        return <DashboardView dailyGoal={appState.dailyGoal} logs={appState.logs} selectedDate={selectedDate} setSelectedDate={setSelectedDate} t={t} locale={locale} macronutrientGoals={appState.macronutrientGoals} />;
     }
   };
 

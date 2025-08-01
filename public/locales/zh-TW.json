@@ -18,11 +18,15 @@
     "of": "/",
     "kcal": "大卡",
     "net_calories_7_days": "最近 7 天淨卡路里",
-    "net_calories": "淨卡路里"
+    "net_calories": "淨卡路里",
+    "macronutrients": "巨量營養素"
   },
   "log": {
     "food": "食物",
     "exercise": "運動",
+    "protein": "蛋白質",
+    "carbs": "碳水化合物",
+    "fat": "脂肪",
     "log_food": "記錄食物",
     "title": "每日記錄",
     "summary": "總結",
@@ -115,6 +119,13 @@
       "tdee_result_1": "您的估計每日卡路里需求為",
       "tdee_result_2": "您的每日目標已更新。",
       "daily_goal": "每日卡路里目標"
+    },
+    "macronutrient_goals": {
+      "title": "巨量營養素目標",
+      "desc": "設定您每日的蛋白質、碳水化合物和脂肪目標（以克為單位）。",
+      "protein": "蛋白質 (克)",
+      "carbs": "碳水化合物 (克)",
+      "fat": "脂肪 (克)"
     },
     "data_management": {
       "title": "資料管理",
