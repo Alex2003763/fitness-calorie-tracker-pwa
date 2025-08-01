@@ -24,6 +24,10 @@
     "food": "Food",
     "exercise": "Exercise",
     "log_food": "Log Food",
+    "title": "Daily Log",
+    "summary": "Summary",
+    "total_food_calories": "Total Food Calories",
+    "total_exercise_calories": "Total Exercise Calories",
     "food_name": "Food Name",
     "calories": "Calories",
     "meal": {
@@ -64,6 +68,8 @@
     "welcome": "Hello! How can I help you?",
     "example_prompt": "e.g., \"Give me some low-calorie lunch ideas.\"",
     "ask_placeholder": "Ask AI for advice...",
+    "new_chat_confirm_title": "Start New Chat?",
+    "new_chat_confirm_desc": "This will clear your current conversation history. This action cannot be undone.",
     "new_chat_confirm": "Are you sure you want to start a new chat? This will clear the current conversation."
   },
   "settings": {
@@ -133,7 +139,9 @@
     "permission_error": "Camera permission is required. Please enable it in your browser settings."
   },
   "general": {
-    "today": "Today"
+    "today": "Today",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "update": {
     "new_version_available": "A new version is available!",

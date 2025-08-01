@@ -205,3 +205,117 @@ export const getAiFoodAnalysis = async (
         globalThis.fetch = originalFetch;
     }
 }
+
+export const getAiFoodCalories = async (
+    foodName: string,
+    apiKey: string,
+    model: string,
+    language: 'en' | 'zh-TW'
+): Promise<number> => {
+    if (!apiKey) {
+        throw new Error("API Key is not set.");
+    }
+
+    const originalFetch = globalThis.fetch;
+    const proxyFetch = createProxyFetch('https://ai-proxy.chatkit.app/generativelanguage', originalFetch);
+
+    try {
+        globalThis.fetch = proxyFetch;
+        const ai = new GoogleGenAI({ apiKey });
+
+        const textPart: Part = {
+            text: language === 'zh-TW'
+                ? `估算 "${foodName}" 的卡路里。請只回傳一個數字。`
+                : `Estimate the calories for "${foodName}". Return only a number.`
+        };
+
+        const responseSchema = {
+            type: Type.OBJECT,
+            properties: {
+                calories: {
+                    type: Type.NUMBER,
+                    description: language === 'zh-TW' ? '估算的卡路里' : 'The estimated calories',
+                },
+            },
+            required: ['calories'],
+        };
+
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: model,
+            contents: { parts: [textPart] },
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: responseSchema,
+            }
+        });
+
+        const jsonString = response.text.trim();
+        const result = JSON.parse(jsonString);
+        return result.calories as number;
+
+    } catch (error) {
+        console.error("Error getting food calories:", error);
+        throw new Error(language === 'zh-TW' ? "無法估算食物卡路里。" : "Failed to estimate food calories.");
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+};
+
+export const getAiExerciseCalories = async (
+    exerciseName: string,
+    duration: number,
+    userProfile: UserProfile,
+    apiKey: string,
+    model: string,
+    language: 'en' | 'zh-TW'
+): Promise<number> => {
+    if (!apiKey) {
+        throw new Error("API Key is not set.");
+    }
+
+    const originalFetch = globalThis.fetch;
+    const proxyFetch = createProxyFetch('https://ai-proxy.chatkit.app/generativelanguage', originalFetch);
+
+    try {
+        globalThis.fetch = proxyFetch;
+        const ai = new GoogleGenAI({ apiKey });
+
+        const weight = userProfile.weight || 70; // Default to 70kg if not set
+
+        const textPart: Part = {
+            text: language === 'zh-TW'
+                ? `估算一個體重 ${weight} 公斤的人做 "${exerciseName}" ${duration} 分鐘所燃燒的卡路里。請只回傳一個數字。`
+                : `Estimate the calories burned for a ${weight}kg person doing "${exerciseName}" for ${duration} minutes. Return only a number.`
+        };
+
+        const responseSchema = {
+            type: Type.OBJECT,
+            properties: {
+                calories: {
+                    type: Type.NUMBER,
+                    description: language === 'zh-TW' ? '估算的燃燒卡路里' : 'The estimated calories burned',
+                },
+            },
+            required: ['calories'],
+        };
+
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: model,
+            contents: { parts: [textPart] },
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: responseSchema,
+            }
+        });
+
+        const jsonString = response.text.trim();
+        const result = JSON.parse(jsonString);
+        return result.calories as number;
+
+    } catch (error) {
+        console.error("Error getting exercise calories:", error);
+        throw new Error(language === 'zh-TW' ? "無法估算運動燃燒的卡路里。" : "Failed to estimate exercise calories.");
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+};

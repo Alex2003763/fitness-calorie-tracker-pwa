@@ -3,7 +3,7 @@ import { useAppState } from './hooks/useAppState.tsx';
 import type { ActiveView, FoodEntry, ExerciseEntry, DailyLog, ChatMessage, AppState, FoodAnalysis, UserProfile } from './types';
 import { getAiAdvice, getAiFoodAnalysis } from './services/geminiService';
 import { HomeIcon, ClipboardIcon, SparklesIcon, TrashIcon, SendIcon, SettingsIcon, CameraIcon, ChevronLeftIcon, ChevronRightIcon, UserCircleIcon, DownloadIcon, UploadIcon, RefreshIcon } from './components/Icons';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, Modal } from './components/ui';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, Modal, AlertDialog } from './components/ui';
 import { Button, Input, Label, Select } from './components/ui';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useTranslation } from './hooks/useTranslation';
@@ -306,18 +306,25 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
     
     
     return (
-        <div className="p-4 space-y-4 animate-fade-in">
-             <div className="flex flex-wrap justify-center sm:justify-between items-center gap-4">
-                <div className="flex bg-white/5 rounded-full p-1 border border-white/10">
-                    <button onClick={() => setActiveTab('food')} className={`w-24 p-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'food' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}>{t('log.food')}</button>
-                    <button onClick={() => setActiveTab('exercise')} className={`w-24 p-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'exercise' ? 'bg-green-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}>{t('log.exercise')}</button>
+        <div className="p-4 space-y-6 animate-fade-in">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 text-center sm:text-left">{t('log.title')}</h1>
+                <div className="self-center sm:self-auto">
+                    <DateNavigator selectedDate={selectedDate} changeDate={changeDate} t={t} locale={locale} />
                 </div>
-                <DateNavigator selectedDate={selectedDate} changeDate={changeDate} t={t} locale={locale} />
+            </div>
+
+            <div className="flex justify-center bg-white/5 rounded-full p-1 border border-white/10 max-w-xs mx-auto">
+                <button onClick={() => setActiveTab('food')} className={`w-full p-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'food' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}>{t('log.food')}</button>
+                <button onClick={() => setActiveTab('exercise')} className={`w-full p-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'exercise' ? 'bg-green-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}>{t('log.exercise')}</button>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
                 <Card>
-                    <CardContent className="p-4">
+                    <CardHeader>
+                        <CardTitle>{activeTab === 'food' ? t('log.add_food') : t('log.add_exercise')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         {activeTab === 'food' ? <AddFoodForm onAddFood={addFood} onScan={() => setIsCameraOpen(true)} onUpload={() => fileUploadRef.current?.click()} scannedFood={scannedFood} /> : <AddExerciseForm />}
                         {scanError && <p className="text-red-400 text-center mt-2">{scanError}</p>}
                         <input type="file" ref={fileUploadRef} onChange={handleFileSelect} accept="image/*" className="hidden" />
@@ -328,7 +335,7 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
                     <CardHeader>
                         <CardTitle>{isToday(selectedDate) ? t('log.todays_log') : selectedDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' }) + t('log.date_log')} - {activeTab === 'food' ? t('log.food') : t('log.exercise')}</CardTitle>
                     </CardHeader>
-                    <CardContent className="max-h-[calc(100vh-20rem)] overflow-y-auto p-4">
+                    <CardContent className="max-h-[calc(100vh-28rem)] overflow-y-auto p-4">
                         {activeTab === 'food' ? (
                             <FoodLog entries={currentLog.food} onDelete={removeFood} />
                         ) : (
@@ -348,6 +355,7 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
 const AiAssistantView = ({ appState, setChatHistory, clearChatHistory, currentLog, onNav, t }: { appState: AppState, setChatHistory: (history: ChatMessage[]) => void, clearChatHistory: () => void, currentLog: DailyLog; onNav: (view: ActiveView) => void; t: (key: string) => string; }) => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
     const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -394,18 +402,26 @@ const AiAssistantView = ({ appState, setChatHistory, clearChatHistory, currentLo
                 <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">{t('ai.title')}</h1>
                 {appState.chatHistory.length > 0 && (
                     <Button
-                        onClick={() => {
-                            if (window.confirm(t('ai.new_chat_confirm'))) {
-                                clearChatHistory();
-                            }
-                        }}
+                        onClick={() => setIsAlertOpen(true)}
                         size="icon"
                         className="bg-transparent hover:bg-gray-700/50 text-gray-400 hover:text-white shadow-none"
                     >
-                        <RefreshIcon className="w-6 h-6" />
+                        <TrashIcon className="w-5 h-5" />
                     </Button>
                 )}
             </div>
+            <AlertDialog
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => {
+                    clearChatHistory();
+                    setIsAlertOpen(false);
+                }}
+                title={t('ai.new_chat_confirm_title')}
+                description={t('ai.new_chat_confirm_desc')}
+                confirmText={t('general.confirm')}
+                cancelText={t('general.cancel')}
+            />
             <div className="flex-grow overflow-y-auto mb-4 space-y-4 pr-2">
                 {appState.chatHistory.length === 0 && (
                     <div className="text-center text-gray-500 pt-16">
@@ -624,15 +640,6 @@ const SettingsView = ({ appState, setApiKey, setAiModel, setLanguage, updateUser
                 </CardContent>
             </Card>
 
-            <Card>
-               <CardHeader>
-                   <CardTitle>{t('settings.app_update.title')}</CardTitle>
-                   <CardDescription>{t('settings.app_update.desc')}</CardDescription>
-               </CardHeader>
-               <CardContent>
-                   <Button onClick={checkForUpdates}><RefreshIcon className="w-5 h-5 mr-2"/>{t('settings.app_update.check_for_updates')}</Button>
-               </CardContent>
-           </Card>
 
             <div className="flex items-center space-x-4 mt-4">
                 <Button onClick={handleSave} className="w-full md:w-auto">{t('settings.save')}</Button>

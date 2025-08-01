@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { useAppState } from '../../hooks/useAppState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Button, Input } from '../ui';
+import { getAiExerciseCalories } from '../../services/geminiService';
 
 const presetExercises = [
-    { nameKey: 'log.exercise_presets.running', met: 9.8 },
-    { nameKey: 'log.exercise_presets.cycling', met: 8.0 },
-    { nameKey: 'log.exercise_presets.swimming', met: 8.3 },
-    { nameKey: 'log.exercise_presets.weight_lifting', met: 3.5 },
-    { nameKey: 'log.exercise_presets.walking', met: 4.3 },
-    { nameKey: 'log.exercise_presets.yoga', met: 2.5 },
+    { nameKey: 'log.exercise_presets.running' },
+    { nameKey: 'log.exercise_presets.cycling' },
+    { nameKey: 'log.exercise_presets.swimming' },
+    { nameKey: 'log.exercise_presets.weight_lifting' },
+    { nameKey: 'log.exercise_presets.walking' },
+    { nameKey: 'log.exercise_presets.yoga' },
 ];
 
 export const AddExerciseForm = () => {
@@ -17,34 +18,49 @@ export const AddExerciseForm = () => {
   const { t } = useTranslation(appState.language);
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
-  const [calories, setCalories] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePresetSelect = (met: number, presetName: string) => {
-    const weight = appState.userProfile.weight || 70; // Default to 70kg if not set
+  const handlePresetSelect = (presetName: string) => {
     const presetDuration = 30; // Default to 30 minutes
-    const calculatedCalories = Math.round((met * 3.5 * weight) / 200 * presetDuration);
-    
     setName(presetName);
     setDuration(String(presetDuration));
-    setCalories(String(calculatedCalories));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name && duration && calories) {
+    if (!name || !duration) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const calories = await getAiExerciseCalories(
+        name,
+        parseInt(duration, 10),
+        appState.userProfile,
+        appState.apiKey!,
+        appState.aiModel,
+        appState.language
+      );
       addExercise({
         name,
         duration: parseInt(duration, 10),
-        calories: parseInt(calories, 10),
+        calories,
       });
       setName('');
       setDuration('');
-      setCalories('');
+    } catch (err) {
+      setError(t('camera.scan_error')); // Using a generic error message
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 p-2">
+      <div className="space-y-2">
         <Input
             type="text"
             value={name}
@@ -52,7 +68,7 @@ export const AddExerciseForm = () => {
             placeholder={t('log.exercise_name')}
             required
         />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-2">
             <Input
                 type="number"
                 value={duration}
@@ -60,34 +76,29 @@ export const AddExerciseForm = () => {
                 placeholder={t('log.duration_mins')}
                 required
             />
-            <Input
-                type="number"
-                value={calories}
-                onChange={e => setCalories(e.target.value)}
-                placeholder={t('log.calories_burned')}
-                required
-            />
         </div>
-        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-            {t('log.add_exercise')}
-        </Button>
-        
-        <div className="pt-4 border-t border-gray-700/50">
-            <h4 className="text-center text-gray-400 mb-3 text-sm">{t('log.exercise_presets.title')}</h4>
-            <div className="flex flex-wrap justify-center gap-2">
-                {presetExercises.map(p => (
-                    <Button
-                        key={p.nameKey}
-                        type="button"
-                        onClick={() => handlePresetSelect(p.met, t(p.nameKey))}
-                        className="bg-gray-700 hover:bg-gray-600 text-xs font-normal h-8 px-3"
-                        size="sm"
-                    >
-                        {t(p.nameKey)}
-                    </Button>
-                ))}
-            </div>
-        </div>
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+      </div>
+      <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
+          {isLoading ? t('loading') : t('log.add_exercise')}
+      </Button>
+      
+      <div className="pt-4 border-t border-gray-700/50">
+          <h4 className="text-center text-gray-400 mb-3 text-sm">{t('log.exercise_presets.title')}</h4>
+          <div className="flex flex-wrap justify-center gap-2">
+              {presetExercises.map(p => (
+                  <Button
+                      key={p.nameKey}
+                      type="button"
+                      onClick={() => handlePresetSelect(t(p.nameKey))}
+                      className="bg-gray-700 hover:bg-gray-600 text-xs font-normal h-8 px-3"
+                      size="sm"
+                  >
+                      {t(p.nameKey)}
+                  </Button>
+              ))}
+          </div>
+      </div>
     </form>
   );
 };

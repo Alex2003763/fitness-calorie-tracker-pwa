@@ -159,3 +159,49 @@ export const Modal = ({
         </div>
     );
 };
+
+// --- Alert Dialog ---
+export const AlertDialog = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  confirmText,
+  cancelText,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex justify-center items-center animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-gray-900/70 border border-white/10 rounded-lg shadow-2xl w-full max-w-md m-4 relative backdrop-blur-xl animate-slide-up-fade"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <p className="mt-2 text-sm text-gray-400">{description}</p>
+        </div>
+        <div className="bg-gray-800/50 px-6 py-4 flex justify-end space-x-3 rounded-b-lg">
+          <Button onClick={onClose} className="bg-transparent border border-gray-600 hover:bg-gray-700 text-white">
+            {cancelText || 'Cancel'}
+          </Button>
+          <Button onClick={onConfirm} className="bg-red-600 hover:bg-red-700 text-white shadow-[0_4px_14px_0_rgb(220,38,38,39%)] hover:shadow-[0_6px_20px_0_rgb(220,38,38,23%)]">
+            {confirmText || 'Confirm'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
