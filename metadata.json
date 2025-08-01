@@ -1,0 +1,7 @@
+{
+  "name": "Fitness Calorie Tracker PWA",
+  "description": "An advanced Progressive Web App (PWA) designed to help users efficiently track daily calorie intake and expenditure. All data is securely stored locally on your device.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

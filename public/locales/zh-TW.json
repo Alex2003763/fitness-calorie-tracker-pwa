@@ -1,0 +1,142 @@
+{
+  "appTitle": "健身卡路里追蹤器",
+  "loading": "載入中...",
+  "nav": {
+    "dashboard": "總覽",
+    "log": "記錄",
+    "ai_assistant": "AI 助理",
+    "settings": "設定"
+  },
+  "dashboard": {
+    "title": "總覽",
+    "intake": "攝取",
+    "burned": "燃燒",
+    "net": "淨值",
+    "goal_progress": "每日目標進度",
+    "consumed": "已攝取",
+    "remaining": "剩餘",
+    "of": "/",
+    "kcal": "大卡",
+    "net_calories_7_days": "最近 7 天淨卡路里",
+    "net_calories": "淨卡路里"
+  },
+  "log": {
+    "food": "食物",
+    "exercise": "運動",
+    "log_food": "記錄食物",
+    "food_name": "食物名稱",
+    "calories": "卡路里",
+    "meal": {
+      "label": "餐別",
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "snack": "點心"
+    },
+    "add_food": "新增食物",
+    "scan_food": "掃描",
+    "upload_image": "上傳",
+    "log_exercise": "記錄運動",
+    "exercise_name": "運動名稱",
+    "duration_mins": "持續時間 (分鐘)",
+    "duration_unit": "分鐘",
+    "calories_burned": "燃燒卡路里",
+    "add_exercise": "新增運動",
+    "todays_log": "今日記錄",
+    "no_food": "尚未記錄任何食物",
+    "no_exercise": "尚未記錄任何運動",
+    "date_log": "的記錄",
+    "exercise_presets": {
+      "title": "或選擇一個預設項目 (30 分鐘)",
+      "running": "跑步",
+      "cycling": "騎自行車",
+      "swimming": "游泳",
+      "weight_lifting": "舉重",
+      "walking": "走路",
+      "yoga": "瑜珈"
+    }
+  },
+  "ai": {
+    "title": "AI 助理",
+    "not_configured": "AI 助理未配置",
+    "not_configured_desc": "請在「設定」頁面中輸入您的 Google Gemini API 金鑰以啟用此功能。",
+    "go_to_settings": "前往設定",
+    "welcome": "安安！有什麼可以幫您的嗎？",
+    "example_prompt": "例如「給我一些低卡路里的午餐建議」",
+    "ask_placeholder": "詢問 AI 建議...",
+    "new_chat_confirm": "您確定要開始新的對話嗎？這將會清除目前的對話記錄。"
+  },
+  "settings": {
+    "title": "設定",
+    "ai_settings": "AI 設定",
+    "ai_settings_desc": "設定您的 AI 助理。API 金鑰將安全地儲存在您的裝置上。",
+    "api_key": "Google Gemini API 金鑰",
+    "api_key_placeholder": "在此貼上您的 API 金鑰",
+    "api_key_required_error": "尚未設定 API 金鑰，請在設定中新增。",
+    "ai_model": "AI 模型",
+    "model": {
+      "flash": "Gemini 2.5 Flash (推薦)",
+      "pro": "Gemini 1.5 Pro",
+      "gemini-pro": "Gemini Pro"
+    },
+    "language": {
+      "label": "語言",
+      "en": "English",
+      "zh-TW": "繁體中文 (Traditional Chinese)"
+    },
+    "save": "儲存所有設定",
+    "saved": "設定已儲存！",
+    "user_profile": {
+      "title": "使用者資料",
+      "desc": "提供您的詳細資訊以計算更準確的每日卡路里目標 (TDEE)。",
+      "age": "年齡",
+      "sex": "生理性別",
+      "select_sex": "選擇性別",
+      "male": "男性",
+      "female": "女性",
+      "weight": "體重 (公斤)",
+      "height": "身高 (公分)",
+      "activity_level": "活動量",
+      "activity": {
+        "sedentary": "久坐 (很少或沒有運動)",
+        "light": "輕度活躍 (輕度運動/運動 1-3 天/週)",
+        "moderate": "中度活躍 (中度運動/運動 3-5 天/週)",
+        "active": "活躍 (劇烈運動/運動 6-7 天/週)",
+        "very_active": "非常活躍 (非常劇烈的運動和體力工作)"
+      },
+      "calculate_goal": "計算並設定目標",
+      "validation_error": "請填寫所有個人資料欄位以計算您的目標。",
+      "tdee_result_1": "您的估計每日卡路里需求為",
+      "tdee_result_2": "您的每日目標已更新。",
+      "daily_goal": "每日卡路里目標"
+    },
+    "data_management": {
+      "title": "資料管理",
+      "desc": "匯出您的資料進行備份，或在新裝置上匯入。",
+      "export": "匯出資料",
+      "import": "匯入資料",
+      "import_confirm": "您確定要匯入資料嗎？這將覆蓋所有目前資料。",
+      "import_success": "資料匯入成功！應用程式現在將重新載入。",
+      "import_error": "匯入資料失敗。檔案可能損壞或格式錯誤。"
+    },
+    "app_update": {
+      "title": "應用程式更新",
+      "desc": "檢查應用程式的新版本。如果找到更新，應用程式將自動重新載入。",
+      "check_for_updates": "檢查更新"
+    }
+  },
+  "camera": {
+    "modal_title": "使用 AI 掃描食物",
+    "scanning": "掃描中...",
+    "scan_error": "無法分析圖片。請重試。",
+    "unidentified": "未識別食物。請手動輸入。",
+    "permission_error": "需要相機權限。請在瀏覽器設定中啟用。"
+  },
+  "general": {
+    "today": "今天"
+  },
+  "update": {
+    "new_version_available": "有新版本可供更新！",
+    "update_now": "立即更新"
+  }
+}
