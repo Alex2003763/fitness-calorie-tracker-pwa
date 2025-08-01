@@ -365,7 +365,7 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
                         <CardTitle>{activeTab === 'food' ? t('log.add_food') : t('log.add_exercise')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {activeTab === 'food' ? <AddFoodForm onAddFood={addFood} onScan={() => setIsCameraOpen(true)} onUpload={() => fileUploadRef.current?.click()} scannedFood={scannedFood} /> : <AddExerciseForm />}
+                        {activeTab === 'food' ? <AddFoodForm onAddFood={addFood} scannedFood={scannedFood} /> : <AddExerciseForm />}
                         {scanError && <p className="text-red-400 text-center mt-2">{scanError}</p>}
                         <input type="file" ref={fileUploadRef} onChange={handleFileSelect} accept="image/*" className="hidden" />
                     </CardContent>
@@ -870,8 +870,8 @@ export default function App() {
           </div>
 
           {/* Mobile Bottom Nav */}
-          <footer className="md:hidden flex-shrink-0 bg-black/30 backdrop-blur-md shadow-t-lg z-10 border-t border-white/10">
-              <nav className="flex justify-around items-center h-16">
+          <footer className="md:hidden flex-shrink-0 bg-black/30 backdrop-blur-md shadow-t-lg z-10 border-t border-white/10 pb-safe">
+              <nav className="flex justify-around items-center h-20">
                   {navItems.map(item => (
                       <NavButton
                           Icon={item.Icon}

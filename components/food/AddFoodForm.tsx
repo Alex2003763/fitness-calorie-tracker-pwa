@@ -9,11 +9,9 @@ import { getAiFoodCalories } from '../../services/geminiService';
 
 interface AddFoodFormProps {
   onAddFood: (food: Omit<FoodEntry, 'id'>) => void;
-  onScan: () => void;
-  onUpload: () => void;
   scannedFood: { name?: string; calories?: string; protein?: string; carbs?: string; fat?: string; };
 }
-const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, scannedFood }) => {
+const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, scannedFood }) => {
   const [name, setName] = useState('');
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
@@ -128,14 +126,6 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, 
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? t('loading') : t('log.add_food')}
       </Button>
-      <div className="grid grid-cols-2 gap-2">
-        <Button type="button" onClick={onScan} className="bg-purple-600 hover:bg-purple-700">
-          <CameraIcon className="w-5 h-5 mr-2" /> {t('log.scan_food')}
-        </Button>
-        <Button type="button" onClick={onUpload} className="bg-green-600 hover:bg-green-700">
-          <UploadIcon className="w-5 h-5 mr-2" /> {t('log.upload_image')}
-        </Button>
-      </div>
     </form>
   );
 };
