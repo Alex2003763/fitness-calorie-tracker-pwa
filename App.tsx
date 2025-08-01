@@ -3,7 +3,7 @@ import { useAppState } from './hooks/useAppState.tsx';
 import type { ActiveView, FoodEntry, ExerciseEntry, DailyLog, ChatMessage, AppState, FoodAnalysis, UserProfile } from './types';
 import { getAiAdvice, getAiFoodAnalysis } from './services/geminiService';
 import { HomeIcon, ClipboardIcon, SparklesIcon, TrashIcon, SendIcon, SettingsIcon, CameraIcon, ChevronLeftIcon, ChevronRightIcon, UserCircleIcon, DownloadIcon, UploadIcon, RefreshIcon } from './components/Icons';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, Modal, AlertDialog } from './components/ui';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from './components/ui';
 import { Button, Input, Label, Select } from './components/ui';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useTranslation } from './hooks/useTranslation';
@@ -344,10 +344,15 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
                     </CardContent>
                 </Card>
             </div>
-             <Modal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} title={t('camera.modal_title')}>
-                <CameraView onClose={() => setIsCameraOpen(false)} onScan={handleScan} isScanning={isScanning} t={t} />
-                {scanError && <p className="text-red-400 text-center mt-2">{scanError}</p>}
-            </Modal>
+            <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+                <DialogContent onClose={() => setIsCameraOpen(false)}>
+                    <DialogHeader>
+                        <DialogTitle>{t('camera.modal_title')}</DialogTitle>
+                    </DialogHeader>
+                    {isCameraOpen && <CameraView onClose={() => setIsCameraOpen(false)} onScan={handleScan} isScanning={isScanning} t={t} />}
+                    {scanError && <p className="text-red-400 text-center mt-2">{scanError}</p>}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
@@ -410,18 +415,29 @@ const AiAssistantView = ({ appState, setChatHistory, clearChatHistory, currentLo
                     </Button>
                 )}
             </div>
-            <AlertDialog
-                isOpen={isAlertOpen}
-                onClose={() => setIsAlertOpen(false)}
-                onConfirm={() => {
-                    clearChatHistory();
-                    setIsAlertOpen(false);
-                }}
-                title={t('ai.new_chat_confirm_title')}
-                description={t('ai.new_chat_confirm_desc')}
-                confirmText={t('general.confirm')}
-                cancelText={t('general.cancel')}
-            />
+            <Dialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('ai.new_chat_confirm_title')}</DialogTitle>
+                        <DialogDescription>
+                            {t('ai.new_chat_confirm_desc')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <DialogClose>
+                            <Button className="bg-transparent border border-gray-600 hover:bg-gray-700 text-white">
+                                {t('general.cancel')}
+                            </Button>
+                        </DialogClose>
+                        <Button onClick={() => {
+                            clearChatHistory();
+                            setIsAlertOpen(false);
+                        }} className="bg-red-600 hover:bg-red-700 text-white shadow-[0_4px_14px_0_rgb(220,38,38,39%)] hover:shadow-[0_6px_20px_0_rgb(220,38,38,23%)]">
+                            {t('general.confirm')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <div className="flex-grow overflow-y-auto mb-4 space-y-4 pr-2">
                 {appState.chatHistory.length === 0 && (
                     <div className="text-center text-gray-500 pt-16">

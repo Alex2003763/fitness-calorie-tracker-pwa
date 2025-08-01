@@ -13,9 +13,9 @@ interface AddFoodFormProps {
   onUpload: () => void;
   scannedFood: { name: string; calories: string };
 }
-
 const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, scannedFood }) => {
   const [name, setName] = useState('');
+  const [calories, setCalories] = useState('');
   const [meal, setMeal] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,7 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, 
   useEffect(() => {
     if (scannedFood) {
       setName(scannedFood.name);
-      // Calories will be fetched by AI, so we don't set it here anymore
+      setCalories(scannedFood.calories);
     }
   }, [scannedFood]);
 
@@ -37,13 +37,20 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, 
     setError(null);
 
     try {
-      const calories = await getAiFoodCalories(name, appState.apiKey!, appState.aiModel, appState.language);
+      let finalCalories: number;
+      if (calories) {
+        finalCalories = parseInt(calories, 10);
+      } else {
+        finalCalories = await getAiFoodCalories(name, appState.apiKey!, appState.aiModel, appState.language);
+      }
+      
       onAddFood({
         name,
-        calories,
+        calories: finalCalories,
         meal,
       });
       setName('');
+      setCalories('');
     } catch (err) {
       setError(t('camera.scan_error')); // Using a generic error message
       console.error(err);
@@ -60,7 +67,10 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onScan, onUpload, 
           type="text"
           placeholder={t('log.food_name')}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setCalories(''); // Clear calories if user types a new name
+          }}
           required
           className="col-span-2"
         />
