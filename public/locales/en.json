@@ -33,6 +33,8 @@
     "total_food_calories": "Total Food Calories",
     "total_exercise_calories": "Total Exercise Calories",
     "food_name": "Food Name",
+    "food_name_placeholder": "Enter food name",
+    "ai_fill_tip": "Leave nutrition fields blank to auto-fill with AI",
     "calories": "Calories",
     "meal": {
       "label": "Meal",
@@ -85,9 +87,9 @@
     "api_key_required_error": "API Key is not set. Please add it in Settings.",
     "ai_model": "AI Model",
     "model": {
-      "flash": "Gemini 2.5 Flash (Recommended)",
-      "pro": "Gemini 1.5 Pro",
-      "gemini-pro": "Gemini Pro"
+      "flash-lite": "Gemini 2.5 Flash-Lite",
+      "flash": "Gemini 2.0 Flash",
+      "25flash":"Gemini 2.5 Flash"
     },
     "language": {
       "label": "Language",

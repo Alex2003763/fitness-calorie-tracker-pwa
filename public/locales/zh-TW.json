@@ -33,6 +33,8 @@
     "total_food_calories": "食物總熱量",
     "total_exercise_calories": "運動總消耗",
     "food_name": "食物名稱",
+    "food_name_placeholder": "輸入食物名稱",
+    "ai_fill_tip": "將營養欄位留空以使用 AI 自動填寫",
     "calories": "卡路里",
     "meal": {
       "label": "餐別",
@@ -85,9 +87,9 @@
     "api_key_required_error": "尚未設定 API 金鑰，請在設定中新增。",
     "ai_model": "AI 模型",
     "model": {
-      "flash": "Gemini 2.5 Flash (推薦)",
-      "pro": "Gemini 1.5 Pro",
-      "gemini-pro": "Gemini Pro"
+      "flash-lite": "Gemini 2.5 Flash-Lite",
+      "flash": "Gemini 2.0 Flash",
+      "25flash":"Gemini 2.5 Flash"
     },
     "language": {
       "label": "語言",

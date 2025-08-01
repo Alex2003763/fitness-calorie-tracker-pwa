@@ -4,14 +4,15 @@ import { useAppState } from '../../hooks/useAppState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { CameraIcon, UploadIcon } from '../Icons';
 import { Button, Input, Select } from '../ui';
-import { getAiFoodCalories } from '../../services/geminiService';
+import { getAiFoodNutrition } from '../../services/geminiService';
 
 
 interface AddFoodFormProps {
   onAddFood: (food: Omit<FoodEntry, 'id'>) => void;
+  onUpload: () => void;
   scannedFood: { name?: string; calories?: string; protein?: string; carbs?: string; fat?: string; };
 }
-const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, scannedFood }) => {
+const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, onUpload, scannedFood }) => {
   const [name, setName] = useState('');
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
@@ -41,21 +42,29 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, scannedFood }) => 
     setError(null);
 
     try {
-      let finalCalories: number;
-      if (calories) {
-        finalCalories = parseInt(calories, 10);
+      let foodData;
+      if (calories && protein && carbs && fat) {
+          foodData = {
+              name,
+              calories: parseInt(calories, 10),
+              protein: parseInt(protein, 10) || 0,
+              carbs: parseInt(carbs, 10) || 0,
+              fat: parseInt(fat, 10) || 0,
+              meal,
+          };
       } else {
-        finalCalories = await getAiFoodCalories(name, appState.apiKey!, appState.aiModel, appState.language);
+          const nutrition = await getAiFoodNutrition(name, appState.apiKey!, appState.aiModel, appState.language);
+          foodData = {
+              name: nutrition.foodName,
+              calories: nutrition.calories,
+              protein: nutrition.protein,
+              carbs: nutrition.carbs,
+              fat: nutrition.fat,
+              meal,
+          };
       }
       
-      onAddFood({
-        name,
-        calories: finalCalories,
-        protein: parseInt(protein, 10) || 0,
-        carbs: parseInt(carbs, 10) || 0,
-        fat: parseInt(fat, 10) || 0,
-        meal,
-      });
+      onAddFood(foodData);
       setName('');
       setCalories('');
       setProtein('');
@@ -71,61 +80,66 @@ const AddFoodForm: React.FC<AddFoodFormProps> = ({ onAddFood, scannedFood }) => 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-2">
-      <div className="space-y-2">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-4">
         <Input
           type="text"
-          placeholder={t('log.food_name')}
+          placeholder={t('log.food_name_placeholder')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="col-span-2"
+          className="w-full"
         />
-        <Input
-          type="number"
-          placeholder={t('log.calories')}
-          value={calories}
-          onChange={(e) => setCalories(e.target.value)}
-          required
-          className="col-span-2"
-        />
-        <Input
-          type="number"
-          placeholder={t('log.protein')}
-          value={protein}
-          onChange={(e) => setProtein(e.target.value)}
-          className="col-span-2"
-        />
-        <Input
-          type="number"
-          placeholder={t('log.carbs')}
-          value={carbs}
-          onChange={(e) => setCarbs(e.target.value)}
-          className="col-span-2"
-        />
-        <Input
-          type="number"
-          placeholder={t('log.fat')}
-          value={fat}
-          onChange={(e) => setFat(e.target.value)}
-          className="col-span-2"
-        />
-          <Select
+        <p className="text-xs text-gray-400 -mt-2 text-center">{t('log.ai_fill_tip')}</p>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            type="number"
+            placeholder={t('log.calories')}
+            value={calories}
+            onChange={(e) => setCalories(e.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder={`${t('log.protein')} (g)`}
+            value={protein}
+            onChange={(e) => setProtein(e.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder={`${t('log.carbs')} (g)`}
+            value={carbs}
+            onChange={(e) => setCarbs(e.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder={`${t('log.fat')} (g)`}
+            value={fat}
+            onChange={(e) => setFat(e.target.value)}
+          />
+        </div>
+        
+        <Select
             value={meal}
             onChange={(e) => setMeal(e.target.value as any)}
-            className="col-span-2"
-          >
+            className="w-full"
+        >
             <option value="breakfast">{t('log.meal.breakfast')}</option>
             <option value="lunch">{t('log.meal.lunch')}</option>
             <option value="dinner">{t('log.meal.dinner')}</option>
             <option value="snack">{t('log.meal.snack')}</option>
-          </Select>
-        </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        </Select>
+        
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? t('loading') : t('log.add_food')}
-      </Button>
+      
+      <div className="space-y-2 pt-2">
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? t('loading') : t('log.add_food')}
+        </Button>
+        <Button type="button" onClick={onUpload} className="w-full bg-green-600 hover:bg-green-700">
+          <UploadIcon className="w-5 h-5 mr-2" /> {t('log.upload_image')}
+        </Button>
+      </div>
     </form>
   );
 };

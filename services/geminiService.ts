@@ -219,12 +219,12 @@ export const getAiFoodAnalysis = async (
     }
 }
 
-export const getAiFoodCalories = async (
+export const getAiFoodNutrition = async (
     foodName: string,
     apiKey: string,
     model: string,
     language: 'en' | 'zh-TW'
-): Promise<number> => {
+): Promise<FoodAnalysis> => {
     if (!apiKey) {
         throw new Error("API Key is not set.");
     }
@@ -238,19 +238,35 @@ export const getAiFoodCalories = async (
 
         const textPart: Part = {
             text: language === 'zh-TW'
-                ? `估算 "${foodName}" 的卡路里。請只回傳一個數字。`
-                : `Estimate the calories for "${foodName}". Return only a number.`
+                ? `估算一份標準份量的 "${foodName}" 的營養資訊。`
+                : `Estimate the nutritional information for a standard serving of "${foodName}".`
         };
 
         const responseSchema = {
             type: Type.OBJECT,
             properties: {
+                foodName: {
+                    type: Type.STRING,
+                    description: language === 'zh-TW' ? '食物的名稱' : 'The name of the food',
+                },
                 calories: {
                     type: Type.NUMBER,
                     description: language === 'zh-TW' ? '估算的卡路里' : 'The estimated calories',
                 },
+                protein: {
+                    type: Type.NUMBER,
+                    description: language === 'zh-TW' ? '估算的蛋白質（克）' : 'The estimated protein in grams',
+                },
+                carbs: {
+                    type: Type.NUMBER,
+                    description: language === 'zh-TW' ? '估算的碳水化合物（克）' : 'The estimated carbohydrates in grams',
+                },
+                fat: {
+                    type: Type.NUMBER,
+                    description: language === 'zh-TW' ? '估算的脂肪（克）' : 'The estimated fat in grams',
+                },
             },
-            required: ['calories'],
+            required: ['foodName', 'calories', 'protein', 'carbs', 'fat'],
         };
 
         const response: GenerateContentResponse = await ai.models.generateContent({
@@ -264,11 +280,11 @@ export const getAiFoodCalories = async (
 
         const jsonString = response.text.trim();
         const result = JSON.parse(jsonString);
-        return result.calories as number;
+        return result as FoodAnalysis;
 
     } catch (error) {
-        console.error("Error getting food calories:", error);
-        throw new Error(language === 'zh-TW' ? "無法估算食物卡路里。" : "Failed to estimate food calories.");
+        console.error("Error getting food nutrition:", error);
+        throw new Error(language === 'zh-TW' ? "無法估算食物營養資訊。" : "Failed to estimate food nutrition.");
     } finally {
         globalThis.fetch = originalFetch;
     }

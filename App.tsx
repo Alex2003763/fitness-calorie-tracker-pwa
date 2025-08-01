@@ -365,7 +365,7 @@ const LogView = ({ currentLog, addFood, addExercise, removeFood, removeExercise,
                         <CardTitle>{activeTab === 'food' ? t('log.add_food') : t('log.add_exercise')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {activeTab === 'food' ? <AddFoodForm onAddFood={addFood} scannedFood={scannedFood} /> : <AddExerciseForm />}
+                        {activeTab === 'food' ? <AddFoodForm onAddFood={addFood} onUpload={() => fileUploadRef.current?.click()} scannedFood={scannedFood} /> : <AddExerciseForm />}
                         {scanError && <p className="text-red-400 text-center mt-2">{scanError}</p>}
                         <input type="file" ref={fileUploadRef} onChange={handleFileSelect} accept="image/*" className="hidden" />
                     </CardContent>
@@ -694,9 +694,9 @@ const SettingsView = ({ appState, setApiKey, setAiModel, setLanguage, updateUser
                     <div>
                         <Label htmlFor="ai-model">{t('settings.ai_model')}</Label>
                         <Select id="ai-model" value={localState.aiModel} onChange={(e) => setLocalState(p => ({...p, aiModel: e.target.value}))}>
-                            <option value="gemini-2.5-flash">{t('settings.model.flash')}</option>
-                            <option value="gemini-1.5-pro">{t('settings.model.pro')}</option>
-                            <option value="gemini-pro">{t('settings.model.gemini-pro')}</option>
+                            <option value="gemini-2.5-flash-lite">{t('settings.model.flash-lite')}</option>
+                            <option value="gemini-2.0-flash">{t('settings.model.flash')}</option>
+                            <option value="gemini-2.5-flash">{t('settings.model.25flash')}</option>
                         </Select>
                     </div>
                     <div>
