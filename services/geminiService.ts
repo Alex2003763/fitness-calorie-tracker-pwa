@@ -115,7 +115,8 @@ export const getAiAdvice = async (
         contents: contents,
         config: {
             systemInstruction: systemInstruction,
-            thinkingConfig: { thinkingBudget: 0 }
+            thinkingConfig: { thinkingBudget: 0 },
+            tools: [{ googleSearch: {} }]
         }
     });
 
